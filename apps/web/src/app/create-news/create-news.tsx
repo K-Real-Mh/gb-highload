@@ -1,30 +1,17 @@
 import './create-news.module.scss';
-import React, { ChangeEvent } from 'react';
+import React, {ChangeEvent, useContext, useState} from 'react';
+import {NewsDispatchContext, Types} from '../news-context/news-context';
 
-/* eslint-disable-next-line */
-export interface CreateNewsProps {}
-export interface CreateNewsState {
-  title: string,
-  description: string,
-}
+function CreateNews() {
+  const [state, setState] = useState({title: '', description: ''});
 
-class CreateNews extends React.Component<CreateNewsProps, Partial<CreateNewsState>>{
-  constructor(props: CreateNewsProps) {
-    super(props);
-    this.state = {
-      title: '',
-      description: ''
-    };
+  const dispatch = useContext(NewsDispatchContext);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setState(prevState => ({ ...prevState, [event.target.name]: event.target.value }));
   }
 
-  handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    this.setState({ [event.target.name]: event.target.value });
-  }
-
-  handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
+  const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     fetch('http://localhost:3333/api/news', {
@@ -32,41 +19,47 @@ class CreateNews extends React.Component<CreateNewsProps, Partial<CreateNewsStat
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(this.state),
+      body: JSON.stringify(state),
     })
       .then(response => response.json())
       .then(data => {
-        alert(this.state.title + ' успешно создана!');
-        this.setState({
+        alert(state.title + ' успешно создана!');
+        setState({
           title: '',
           description: ''
         });
+        dispatch({
+          type: Types.Add,
+          news: {
+            ...data,
+            createdAt: Date.now(),
+          }
+        })
       })
-      .catch((error) => {
+      .catch(() => {
         alert('Ошибка :-(');
       });
   }
 
-  override render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <h1>Создание новости</h1>
         <p>
           <label>
-            <h4>Заголовок</h4>
-            <input required name="title" type="text" value={this.state.title} onChange={this.handleChange} />
+            <legend>Заголовок</legend>
+            <input required name="title" type="text" value={state.title} onChange={handleChange} />
           </label>
         </p>
         <p>
           <label>
-            <h4>Текст</h4>
-            <textarea required name="description" value={this.state.description} onChange={this.handleChange} />
+            <legend>Текст</legend>
+            <textarea required name="description" value={state.description} onChange={handleChange} />
           </label>
         </p>
         <input type="submit" value="Добавить" />
       </form>
     );
-  }
+
 }
 
 export default CreateNews;

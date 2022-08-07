@@ -1,4 +1,4 @@
-import {Body, CacheInterceptor, Controller, Get, Header, Post, UseInterceptors} from '@nestjs/common';
+import { Body, Controller, Get, Header, Post } from '@nestjs/common';
 
 import { IsNotEmpty } from 'class-validator';
 
@@ -11,7 +11,6 @@ export class CreateNewsDto {
 }
 
 @Controller('news')
-@UseInterceptors(CacheInterceptor)
 export class NewsController {
   @Get()
   async getNews() {

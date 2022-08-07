@@ -1,10 +1,30 @@
 import './news.module.scss';
-import {useContext} from 'react';
-import {NewsContext} from '../news-context/news-context';
+import { useEffect, useState } from 'react';
 
-export function News() {
+/* eslint-disable-next-line */
+export interface NewsProps {}
+export interface PeaceOfNews {
+  id: number,
+  title: string,
+  description: string,
+  createdAt: number
+}
 
-  const news = useContext(NewsContext);
+export function News(props: NewsProps) {
+  const [news, setNews] = useState([] as PeaceOfNews[]);
+  const sortNews = (news: PeaceOfNews[]) => {
+    return news.sort((a, b) => a.createdAt - b.createdAt)
+  }
+
+  useEffect(() => {
+    fetch('http://localhost:3333/api/news')
+      .then(response => response.json())
+      .then(news => {
+        const sortedNews = sortNews(news);
+
+        setNews(sortedNews);
+      })
+  }, []);
 
   return (
     <div>
